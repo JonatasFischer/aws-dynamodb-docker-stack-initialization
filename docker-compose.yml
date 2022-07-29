@@ -1,0 +1,21 @@
+---
+version: '2.1'
+services:
+  dynamodb-local:
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
+    image: "amazon/dynamodb-local:latest"
+    container_name: dynamodb-local
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./dynamodb/data:/home/dynamodblocal/data
+    working_dir: /home/dynamodblocal
+  init-dynamodb-schema:
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
+    image: "amazon/aws-cli:latest"
+    container_name: sidecar-to-dynamodb-local
+    depends_on:
+      - dynamodb-local
+    volumes:
+      - ./dynamodb/scripts/:/scripts/
+    entrypoint: [ '/bin/sh', '/scripts/init.sh' ]
